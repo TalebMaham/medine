@@ -41,7 +41,7 @@ function setupProductionForm() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", setupProductionForm);
+//document.addEventListener("DOMContentLoaded", setupProductionForm);
 
 function fetchProduction() {
     fetch("medine/get_production")
