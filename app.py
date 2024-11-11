@@ -27,12 +27,14 @@ users = {
     "sidna" : "sidnapassword"
 }
 
+connected = []
 
 
 @app.route("/")
 def index():
     if 'username' in session:
         username = session['username']
+        connected.append(username)
         return render_template("index.html",username=username)
     return redirect(url_for('login'))
 
@@ -56,6 +58,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    connected.pop(session["username"])
     session.pop('username', None)
     flash('You were successfully logged out')
     return redirect(url_for('login'))
@@ -190,6 +193,10 @@ def delete_production_by_date():
         return jsonify({"status": "error", "message": "Date non trouvée dans les données."}), 404
 
 
+
+@app.route("/connected")
+def get_connected() : 
+    return jsonify({"connected" : connected})
 
 if __name__ == "__main__":
     app.run(debug=True)
