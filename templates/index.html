@@ -1,4 +1,4 @@
- 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -17,6 +17,9 @@
             <button onclick="showSection('stock')">Stock</button>
             <button onclick="showSection('waste')">Waste</button>
             <button onclick="showSection('report')">Report</button>
+            {% if 'username' in session %}
+            <button class="btn-danger" onclick="deconnexion()">Déconnexion</button>
+            {% endif %}
         </nav>
     </header>
     

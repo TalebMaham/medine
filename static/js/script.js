@@ -1,5 +1,5 @@
 // Définition de la base de l'URL
-const baseURL = "medine";  // ou laisser vide si vous n'avez pas besoin de "medine"
+const baseURL = "";  // ou laisser vide si vous n'avez pas besoin de "medine"
 
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
@@ -240,6 +240,25 @@ function deleteProductionByDate(date) {
         alert("Erreur lors de la suppression des données.");
     });
 }
+
+function deconnexion() {
+    fetch(`${baseURL}/logout`, {
+        method: "GET",
+    })
+    .then(response => {
+        if (response.ok) {
+            // Déconnexion réussie, redirection vers la page de connexion ou d'accueil
+            window.location.href = "/login";  // Remplacez "/login" par l'URL appropriée
+        } else {
+            alert("Erreur lors de la déconnexion. Veuillez réessayer.");
+        }
+    })
+    .catch(error => {
+        console.error("Erreur lors de la déconnexion:", error);
+        alert("Erreur lors de la déconnexion.");
+    });
+}
+
 
 function showSuccessToast(message) {
     const toast = document.createElement("div");
