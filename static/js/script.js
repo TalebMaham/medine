@@ -241,7 +241,7 @@ function deleteProductionByDate(date) {
 }
 
 function deconnexion() {
-    fetch(`${baseURL}/logout`, {
+    fetch(`${baseURL}logout`, {
         method: "GET",
     })
     .then(response => {
