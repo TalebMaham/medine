@@ -45,7 +45,7 @@ function setupProductionForm() {
 }
 
 function fetchProduction() {
-    fetch(`${baseURL}/get_production`)  // Utilisation de baseURL ici
+    fetch(`${baseURL}/get_production`)
         .then(response => response.json())
         .then(data => {
             const dailyProduction = document.getElementById("daily-production");
@@ -79,11 +79,19 @@ function fetchProduction() {
 
                 dateSection.appendChild(formatList);
 
+                // Bouton Générer rapport
                 const generateButton = document.createElement("button");
-                generateButton.className = "btn btn-outline-primary mt-2";
+                generateButton.className = "btn btn-outline-primary mt-2 mr-2";
                 generateButton.textContent = "Générer le rapport";
                 generateButton.onclick = () => generateReport(date);
                 dateSection.appendChild(generateButton);
+
+                // Bouton Supprimer
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "btn btn-outline-danger mt-2";
+                deleteButton.textContent = "Supprimer";
+                deleteButton.onclick = () => deleteProductionByDate(date);
+                dateSection.appendChild(deleteButton);
 
                 dailyProduction.appendChild(dateSection);
             }
@@ -185,7 +193,7 @@ function generateReport(date) {
         });
 }
 
-document.getElementById("delete-button").addEventListener("click", function() {
+    function deleteProsuction(){
     if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
         fetch(`${baseURL}/clear_production`, {  // Utilisation de baseURL ici
             method: "POST",
@@ -206,7 +214,32 @@ document.getElementById("delete-button").addEventListener("click", function() {
             alert("Une erreur est survenue.");
         });
     }
-});
+    }
+
+
+    // Fonction pour supprimer les données de production par date
+function deleteProductionByDate(date) {
+    fetch(`${baseURL}/delete_production_by_date`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ date: date })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(`Données supprimées pour la date ${date}.`);
+            fetchProduction();  // Rafraîchir la liste de production après suppression
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error("Erreur lors de la suppression des données:", error);
+        alert("Erreur lors de la suppression des données.");
+    });
+}
 
 function showSuccessToast(message) {
     const toast = document.createElement("div");

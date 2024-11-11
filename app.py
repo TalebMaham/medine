@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, flash, redirect, render_template, request, jsonify, session, url_for
 import json
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 # Fichier JSON pour stocker les données de production
 DATA_FILE = 'production_data.json'
@@ -20,9 +21,43 @@ def save_data(data):
     with open(DATA_FILE, 'w') as file:
         json.dump(data, file)
 
+users = {
+    "abidine" : "abidinepassword",
+    "sidna" : "sidnapassword"
+}
+
+
+
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if 'username' in session:
+        username = session['username']
+        return render_template("index.html",username=username)
+    return redirect(url_for('login'))
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username in users and users[username] == password:
+            session['username'] = username
+            flash('You were successfully logged in')
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid credentials. Please try again.')
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash('You were successfully logged out')
+    return redirect(url_for('login'))
 
 @app.route("/add_production", methods=["POST"])
 def add_production():
@@ -134,6 +169,24 @@ def clear_production():
     # Supprime tout le contenu du fichier JSON en enregistrant un dictionnaire vide
     save_data({})
     return jsonify({"status": "success", "message": "Toutes les données de production ont été supprimées."})
+
+
+@app.route("/delete_production_by_date", methods=["POST"])
+def delete_production_by_date():
+    data = load_data()
+    # Récupère la date depuis la requête
+    date = request.json.get("date")
+
+    if not date:
+        return jsonify({"status": "error", "message": "Date manquante."}), 400
+
+    if date in data:
+        # Supprime les données pour la date spécifiée
+        del data[date]
+        save_data(data)
+        return jsonify({"status": "success", "message": f"Données supprimées pour la date {date}."})
+    else:
+        return jsonify({"status": "error", "message": "Date non trouvée dans les données."}), 404
 
 
 
