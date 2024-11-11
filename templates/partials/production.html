@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Production{% endblock %}
+
+{% block content %}
+    <h2 class="text-center mb-4">Production</h2>
+    <form id="production-form" class="mb-4">
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <label for="date" class="mr-2">Date :</label>
+                <input type="date" id="date" name="date" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <label for="format" class="mr-2">Format :</label>
+                <select id="format" name="format" class="form-control">
+                    <option value="El Medina 500g">El Medina 500g</option>
+                    <option value="Roma 500g">Roma 500g</option>
+                    <option value="El Medina 250g">El Medina 250g</option>
+                    <option value="Roma 250g">Roma 250g</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="quantity" class="mr-2">Quantité :</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mt-2">Ajouter</button>
+            </div>
+        </div>
+    </form>
+    <p id="production-status" class="text-center text-success"></p>
+
+    <div class="text-center mb-3">
+        <button onclick="fetchProduction()" class="btn btn-secondary">Afficher la production</button>
+    </div>
+
+    <div id="production-list">
+        <h3 class="mt-4">Liste des productions</h3>
+        <div id="daily-production" class="list-group"></div>
+
+        <h3 class="mt-4">Totaux Cumulés</h3>
+        <ul id="cumulative-totals" class="list-group"></ul>
+
+        <h3 class="mt-4">Pourcentages de Production</h3>
+        <ul id="percentages" class="list-group"></ul>
+    </div>
+{% endblock %}

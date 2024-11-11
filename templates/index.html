@@ -1,0 +1,39 @@
+ 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Production</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Gestion de Production</h1>
+        <nav>
+            <button onclick="showSection('production')">Production</button>
+            <button onclick="showSection('stock')">Stock</button>
+            <button onclick="showSection('waste')">Waste</button>
+            <button onclick="showSection('report')">Report</button>
+        </nav>
+    </header>
+    
+    <main>
+        <div id="sections">
+            <div id="production" class="section" style="display:none;">
+                {% include "partials/production.html" %}
+            </div>
+            <div id="stock" class="section" style="display:none;">
+                {% include "partials/stock.html" %}
+            </div>
+            <div id="waste" class="section" style="display:none;">
+                {% include "partials/waste.html" %}
+            </div>
+            <div id="report" class="section" style="display:none;">
+                {% include "partials/report.html" %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>
