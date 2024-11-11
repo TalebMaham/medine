@@ -21,7 +21,8 @@
             <button onclick="showSection('waste')">Waste</button>
             <button onclick="showSection('report')">Report</button>
             {% if 'username' in session %}
-            <button class="btn-danger" onclick="deconnexion()">Déconnexion</button>
+            <a class="btn btn-primary navlink" href="/logout">Déconnexion</a>
+
             {% endif %}
         </nav>
     </header>

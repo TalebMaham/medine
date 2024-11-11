@@ -58,7 +58,7 @@ def login():
 def logout():
     session.pop('username', None)
     flash('You were successfully logged out')
-    return render_template('login.html')
+    return redirect(url_for('login'))
 
 @app.route("/add_production", methods=["POST"])
 def add_production():
