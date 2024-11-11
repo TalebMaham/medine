@@ -260,7 +260,7 @@ function deleteProductionByDate(date) {
 
 function logout() {
     // Utilisation de baseURL pour la déconnexion
-    window.location.href = `${baseURL}/logout`;
+    window.location.href = `${baseURL}logout`;
 }
 
 
