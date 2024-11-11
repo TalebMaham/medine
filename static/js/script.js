@@ -19,7 +19,7 @@ function setupProductionForm() {
         const format = document.getElementById("format").value;
         const quantity = parseInt(document.getElementById("quantity").value);
 
-        fetch("/add_production", {
+        fetch("medine/add_production", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date: date, format: format, quantity: quantity })
@@ -44,7 +44,7 @@ function setupProductionForm() {
 document.addEventListener("DOMContentLoaded", setupProductionForm);
 
 function fetchProduction() {
-    fetch("/get_production")
+    fetch("medine/get_production")
         .then(response => response.json())
         .then(data => {
             const dailyProduction = document.getElementById("daily-production");
@@ -118,7 +118,7 @@ function fetchProduction() {
 
 
 function updateProduction(date, format, quantity) {
-    fetch("/update_production", {
+    fetch("medine/update_production", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: date, format: format, quantity: parseInt(quantity) })
@@ -141,7 +141,7 @@ function updateProduction(date, format, quantity) {
 
 
 function generateReport(date) {
-    fetch(`/generate_report/${date}`)
+    fetch(`medine/generate_report/${date}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "error") {
