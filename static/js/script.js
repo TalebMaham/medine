@@ -240,22 +240,11 @@ function deleteProductionByDate(date) {
     });
 }
 
-function deconnexion() {
-    fetch(`${baseURL}logout`, {
-        method: "GET",
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log("OK")
-        } else {
-            alert("Erreur lors de la déconnexion. Veuillez réessayer.");
-        }
-    })
-    .catch(error => {
-        console.error("Erreur lors de la déconnexion:", error);
-        alert("Erreur lors de la déconnexion.");
-    });
+function logout() {
+    // Utilisation de baseURL pour la déconnexion
+    window.location.href = `${baseURL}/logout`;
 }
+
 
 
 function showSuccessToast(message) {
