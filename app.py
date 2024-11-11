@@ -129,6 +129,13 @@ def generate_report(date):
     }
     return jsonify(report)
 
+@app.route("/clear_production", methods=["POST"])
+def clear_production():
+    # Supprime tout le contenu du fichier JSON en enregistrant un dictionnaire vide
+    save_data({})
+    return jsonify({"status": "success", "message": "Toutes les données de production ont été supprimées."})
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
