@@ -1,5 +1,5 @@
 // Définition de la base de l'URL
-const baseURL = "";  // ou laisser vide si vous n'avez pas besoin de "medine"
+const baseURL = "medine";  // ou laisser vide si vous n'avez pas besoin de "medine"
 
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
