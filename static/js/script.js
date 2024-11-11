@@ -1,6 +1,4 @@
 
-const baseURL = window.location.origin;
-
 
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
@@ -23,7 +21,7 @@ function setupProductionForm() {
         const format = document.getElementById("format").value;
         const quantity = parseInt(document.getElementById("quantity").value);
 
-        fetch(`/add_production`, {  // Utilisation de baseURL ici
+        fetch(`${baseURL}/add_production`, {  // Utilisation de baseURL ici
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date: date, format: format, quantity: quantity })
@@ -46,7 +44,7 @@ function setupProductionForm() {
 }
 
 function fetchProduction() {
-    fetch(`/get_production`)
+    fetch(`${baseURL}/get_production`)
         .then(response => response.json())
         .then(data => {
             const dailyProduction = document.getElementById("daily-production");
@@ -122,7 +120,7 @@ function fetchProduction() {
 }
 
 function updateProduction(date, format, quantity) {
-    fetch(`/update_production`, {  // Utilisation de baseURL ici
+    fetch(`${baseURL}/update_production`, {  // Utilisation de baseURL ici
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: date, format: format, quantity: parseInt(quantity) })
@@ -142,7 +140,7 @@ function updateProduction(date, format, quantity) {
 }
 
 function generateReport(date) {
-    fetch(`/generate_report/${date}`)  // Utilisation de baseURL ici
+    fetch(`${baseURL}/generate_report/${date}`)  // Utilisation de baseURL ici
         .then(response => response.json())
         .then(data => {
             if (data.status === "error") {
@@ -196,7 +194,7 @@ function generateReport(date) {
 
     function deleteProsuction(){
     if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
-        fetch(`/clear_production`, {  // Utilisation de baseURL ici
+        fetch(`${baseURL}/clear_production`, {  // Utilisation de baseURL ici
             method: "POST",
             headers: { "Content-Type": "application/json" }
         })
@@ -220,7 +218,7 @@ function generateReport(date) {
 
     // Fonction pour supprimer les données de production par date
 function deleteProductionByDate(date) {
-    fetch(`/delete_production_by_date`, {
+    fetch(`${baseURL}/delete_production_by_date`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -243,7 +241,7 @@ function deleteProductionByDate(date) {
 }
 
 function deconnexion() {
-    fetch(`/logout`, {
+    fetch(`${baseURL}/logout`, {
         method: "GET",
     })
     .then(response => {

@@ -29,6 +29,10 @@
         </div>
     </form>
     <p id="production-status" class="text-center text-success"></p>
+    <script>
+        const baseURL = "{{ url_for('index', _external=True) }}";
+    </script>
+    
 
     <div class="text-center mb-3">
         <button onclick="fetchProduction()" class="btn btn-secondary">Afficher la production</button>
