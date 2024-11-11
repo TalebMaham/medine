@@ -168,6 +168,22 @@ function generateReport(date) {
                     reportContent += "<p>Aucune donnée cumulative disponible.</p>";
                 }
 
+                // Ajouter un bouton d'impression en bas du rapport
+                reportContent += `
+                    <button onclick="window.print()" style="
+                        display: block;
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        background-color: #007bff;
+                        color: #fff;
+                        border: none;
+                        cursor: pointer;
+                    ">
+                        Imprimer en PDF
+                    </button>
+                `;
+
                 const reportWindow = window.open("", "_blank");
                 reportWindow.document.write(`
                     <html>
@@ -179,6 +195,7 @@ function generateReport(date) {
                                 h4 { margin-top: 15px; color: #555; }
                                 ul { list-style-type: none; padding: 0; }
                                 li { margin-bottom: 5px; }
+                                button { font-family: Arial, sans-serif; }
                             </style>
                         </head>
                         <body>${reportContent}</body>
@@ -191,6 +208,7 @@ function generateReport(date) {
             console.error("Erreur lors de la génération du rapport:", error);
         });
 }
+
 
     function deleteProsuction(){
     if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
