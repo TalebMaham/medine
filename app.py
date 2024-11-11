@@ -58,10 +58,13 @@ def login():
 
 @app.route('/logout')
 def logout():
-    connected.pop(session["username"])
+    username = session.get("username")
+    if username in connected:
+        connected.remove(username)
     session.pop('username', None)
     flash('You were successfully logged out')
     return redirect(url_for('login'))
+
 
 @app.route("/add_production", methods=["POST"])
 def add_production():
