@@ -1,3 +1,6 @@
+// Définition de la base de l'URL
+const baseURL = "medine";  // ou laisser vide si vous n'avez pas besoin de "medine"
+
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
     document.querySelectorAll('.section').forEach(section => {
@@ -19,7 +22,7 @@ function setupProductionForm() {
         const format = document.getElementById("format").value;
         const quantity = parseInt(document.getElementById("quantity").value);
 
-        fetch("medine/add_production", {
+        fetch(`${baseURL}/add_production`, {  // Utilisation de baseURL ici
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date: date, format: format, quantity: quantity })
@@ -41,17 +44,13 @@ function setupProductionForm() {
     });
 }
 
-
-//document.addEventListener("DOMContentLoaded", setupProductionForm);
-
 function fetchProduction() {
-    fetch("medine/get_production")
+    fetch(`${baseURL}/get_production`)  // Utilisation de baseURL ici
         .then(response => response.json())
         .then(data => {
             const dailyProduction = document.getElementById("daily-production");
             dailyProduction.innerHTML = "";
 
-            // Affichage des productions par jour avec un bouton de génération de rapport pour chaque jour
             for (const [date, formats] of Object.entries(data.daily_totals)) {
                 let dateSection = document.createElement("div");
                 dateSection.className = "mb-3";
@@ -73,7 +72,6 @@ function fetchProduction() {
                     }
                 }
 
-                // Affichage du total du jour
                 const totalItem = document.createElement("li");
                 totalItem.className = "list-group-item font-weight-bold";
                 totalItem.innerHTML = `Total du jour: ${formats.total}`;
@@ -81,7 +79,6 @@ function fetchProduction() {
 
                 dateSection.appendChild(formatList);
 
-                // Ajout d'un seul bouton "Générer le rapport" pour la journée
                 const generateButton = document.createElement("button");
                 generateButton.className = "btn btn-outline-primary mt-2";
                 generateButton.textContent = "Générer le rapport";
@@ -91,7 +88,6 @@ function fetchProduction() {
                 dailyProduction.appendChild(dateSection);
             }
 
-            // Affichage des totaux cumulés pour chaque produit
             const cumulativeTotals = document.getElementById("cumulative-totals");
             cumulativeTotals.innerHTML = "";
             for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
@@ -101,7 +97,6 @@ function fetchProduction() {
                 cumulativeTotals.appendChild(listItem);
             }
 
-            // Affichage des pourcentages de production pour chaque produit
             const percentages = document.getElementById("percentages");
             percentages.innerHTML = "";
             for (const [format, percentage] of Object.entries(data.percentages)) {
@@ -117,9 +112,8 @@ function fetchProduction() {
         });
 }
 
-
 function updateProduction(date, format, quantity) {
-    fetch("medine/update_production", {
+    fetch(`${baseURL}/update_production`, {  // Utilisation de baseURL ici
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date: date, format: format, quantity: parseInt(quantity) })
@@ -138,11 +132,8 @@ function updateProduction(date, format, quantity) {
     });
 }
 
-
-
-
 function generateReport(date) {
-    fetch(`medine/generate_report/${date}`)
+    fetch(`${baseURL}/generate_report/${date}`)  // Utilisation de baseURL ici
         .then(response => response.json())
         .then(data => {
             if (data.status === "error") {
@@ -151,7 +142,6 @@ function generateReport(date) {
                 let reportContent = `<h3>Rapport pour le ${data.date}</h3>`;
                 reportContent += `<p><strong>Total du jour:</strong> ${data.daily_total}</p>`;
 
-                // Production du jour par produit
                 if (data.daily_data) {
                     reportContent += "<h4>Production du jour par produit:</h4><ul>";
                     for (const [format, quantity] of Object.entries(data.daily_data)) {
@@ -160,7 +150,6 @@ function generateReport(date) {
                     reportContent += "</ul>";
                 }
 
-                // Cumulés par produit
                 if (data.cumulative_totals && data.percentages) {
                     reportContent += "<h4>Cumulés par produit:</h4><ul>";
                     for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
@@ -172,7 +161,6 @@ function generateReport(date) {
                     reportContent += "<p>Aucune donnée cumulative disponible.</p>";
                 }
 
-                // Afficher le rapport dans une nouvelle fenêtre
                 const reportWindow = window.open("", "_blank");
                 reportWindow.document.write(`
                     <html>
@@ -197,8 +185,28 @@ function generateReport(date) {
         });
 }
 
+document.getElementById("delete-button").addEventListener("click", function() {
+    if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
+        fetch(`${baseURL}/clear_production`, {  // Utilisation de baseURL ici
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert(data.message);
+                fetchProduction();   
+            } else {
+                alert("Erreur lors de la suppression des données.");
+            }
+        })
 
-
+        .catch(error => {
+            console.error("Erreur lors de la suppression des données:", error);
+            alert("Une erreur est survenue.");
+        });
+    }
+});
 
 function showSuccessToast(message) {
     const toast = document.createElement("div");
@@ -206,7 +214,7 @@ function showSuccessToast(message) {
     
     const icon = document.createElement("span");
     icon.className = "icon";
-    icon.innerHTML = "&#10003;"; // Symbole de validation
+    icon.innerHTML = "&#10003;"; 
     toast.appendChild(icon);
     
     const text = document.createElement("span");
@@ -215,7 +223,6 @@ function showSuccessToast(message) {
 
     document.body.appendChild(toast);
 
-    // Disparition automatique du toast après 3 secondes
     setTimeout(() => {
         toast.remove();
     }, 3000);
