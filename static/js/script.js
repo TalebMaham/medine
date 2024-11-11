@@ -1,5 +1,5 @@
 // Définition de la base de l'URL
-const baseURL = "";  // ou laisser vide si vous n'avez pas besoin de "medine"
+const baseURL = "medine";  // ou laisser vide si vous n'avez pas besoin de "medine"
 
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
@@ -247,8 +247,7 @@ function deconnexion() {
     })
     .then(response => {
         if (response.ok) {
-            // Déconnexion réussie, redirection vers la page de connexion ou d'accueil
-            window.location.href = "/login";  // Remplacez "/login" par l'URL appropriée
+            console.log("OK")
         } else {
             alert("Erreur lors de la déconnexion. Veuillez réessayer.");
         }
