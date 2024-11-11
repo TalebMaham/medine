@@ -46,7 +46,7 @@ def login():
         if username in users and users[username] == password:
             session['username'] = username
             flash('You were successfully logged in')
-            return render_template("index.html",username=username)
+            return redirect(url_for('index'))
         else:
             flash('Invalid credentials. Please try again.')
             return redirect(url_for('login'))
