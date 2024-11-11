@@ -27,7 +27,7 @@ function setupProductionForm() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                document.getElementById("production-status").innerText = "Production ajoutée avec succès !";
+                showSuccessToast("Produit ajouté avec succès !");
                 document.getElementById("quantity").value = "";
                 document.getElementById("date").value = ""; // Réinitialise la date après l'ajout
             } else {
@@ -40,6 +40,7 @@ function setupProductionForm() {
         });
     });
 }
+
 
 //document.addEventListener("DOMContentLoaded", setupProductionForm);
 
@@ -199,3 +200,24 @@ function generateReport(date) {
 
 
 
+function showSuccessToast(message) {
+    const toast = document.createElement("div");
+    toast.className = "toast-success";
+    
+    const icon = document.createElement("span");
+    icon.className = "icon";
+    icon.innerHTML = "&#10003;"; // Symbole de validation
+    toast.appendChild(icon);
+    
+    const text = document.createElement("span");
+    text.innerText = message;
+    toast.appendChild(text);
+
+    document.body.appendChild(toast);
+
+    // Disparition automatique du toast après 3 secondes
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+    fetchProduction(); 
+}

@@ -20,6 +20,8 @@ button {
     cursor: pointer;
 }
 
+
+
 button:hover {
     background-color: #0056b3;
 }
@@ -34,4 +36,25 @@ button:hover {
 
 #sections {
     margin-top: 20px;
+}
+
+
+
+/* CSS pour le toast */
+.toast-success {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4CAF50; /* Couleur verte */
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast-success .icon {
+    font-size: 20px;
 }
