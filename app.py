@@ -30,7 +30,7 @@ def add_production():
     # Récupère la date depuis la requête
     date = request.json.get("date")
     format_name = request.json.get("format")
-    quantity = request.json.get("quantity")
+    quantity = int(request.json.get("quantity"))
     
     if not date:
         return jsonify({"status": "error", "message": "Date manquante."}), 400
