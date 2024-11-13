@@ -161,109 +161,147 @@ async function updateProduction(date, format, quantity) {
 }
 
 
-async function generateReport(date) {
-    if (isProcessing) return;
-    isProcessing = true;
-
-    try {
-        const response = await fetch(`${baseURL}/generate_report/${date}`);
-        const data = await response.json();
-
-        if (data.status === "error") {
-            alert(data.message);
-        } else {
-            let reportContent = `<h3>Rapport pour le ${data.date}</h3>`;
-            reportContent += `<p><strong>Total du jour:</strong> ${data.daily_total}</p>`;
-
-            if (data.daily_data) {
-                reportContent += "<h4>Production du jour par produit:</h4><ul>";
-                for (const [format, quantity] of Object.entries(data.daily_data)) {
-                    reportContent += `<li>${format}: ${quantity}</li>`;
-                }
-                reportContent += "</ul>";
-            }
-
-            if (data.cumulative_totals && data.percentages) {
-                reportContent += "<h4>Cumulés par produit:</h4><ul>";
-                for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
-                    const percentage = data.percentages[format] ? `${data.percentages[format]}%` : "0%";
-                    reportContent += `<li>${format}: ${quantity} (${percentage})</li>`;
-                }
-                reportContent += `<li><strong>Total global:</strong> ${data.total_global}</li></ul>`;
-            } else {
-                reportContent += "<p>Aucune donnée cumulative disponible.</p>";
-            }
-
-            reportContent += `
-                <button onclick="window.print()" style="
-                    display: block;
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    font-size: 16px;
-                    background-color: #007bff;
-                    color: #fff;
-                    border: none;
-                    cursor: pointer;
-                ">
-                    Imprimer en PDF
-                </button>
-            `;
-
-            const reportWindow = window.open("", "_blank");
-            reportWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Rapport du ${data.date}</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; }
-                            h3 { color: #333; }
-                            h4 { margin-top: 15px; color: #555; }
-                            ul { list-style-type: none; padding: 0; }
-                            li { margin-bottom: 5px; }
-                            button { font-family: Arial, sans-serif; }
-                        </style>
-                    </head>
-                    <body>${reportContent}</body>
-                </html>
-            `);
-            reportWindow.document.close();
-        }
-    } catch (error) {
-        console.error("Erreur lors de la génération du rapport:", error);
-    } finally {
-        isProcessing = false;
-    }
-}
-
-async function deleteProduction() {
-    if (isProcessing) return;
-    isProcessing = true;
-
-    if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
-        try {
-            const response = await fetch(`${baseURL}/clear_production`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            });
-            const data = await response.json();
-
-            if (data.status === "success") {
+function generateReport(date) {
+    fetch(`${baseURL}/generate_report/${date}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "error") {
                 alert(data.message);
-                isProcessing = false;
-                fetchProduction(); // Recharger les données après suppression
             } else {
-                alert("Erreur lors de la suppression des données.");
+                let reportContent = `<h3>Rapport pour le ${data.date}</h3>`;
+                reportContent += `<p><strong>Total du jour:</strong> ${data.daily_total}</p>`;
+
+                // Tableau pour la production quotidienne par produit
+                if (data.daily_data) {
+                    reportContent += "<h4>Production du jour par produit:</h4>";
+                    reportContent += `
+                        <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    for (const [format, quantity] of Object.entries(data.daily_data)) {
+                        reportContent += `
+                            <tr>
+                                <td>${format}</td>
+                                <td>${quantity}</td>
+                            </tr>
+                        `;
+                    }
+                    reportContent += "</tbody></table>";
+                }
+
+                // Tableau pour les données cumulées par produit
+                if (data.cumulative_totals && data.percentages) {
+                    reportContent += "<h4>Cumulés par produit:</h4>";
+                    reportContent += `
+                        <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Quantité Cumulée</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
+                        const percentage = data.percentages[format] ? `${data.percentages[format]}%` : "0%";
+                        reportContent += `
+                            <tr>
+                                <td>${format}</td>
+                                <td>${quantity}</td>
+                                <td>${percentage}</td>
+                            </tr>
+                        `;
+                    }
+                    reportContent += `
+                            <tr>
+                                <td><strong>Total global</strong></td>
+                                <td colspan="2">${data.total_global}</td>
+                            </tr>
+                        </tbody></table>
+                    `;
+                } else {
+                    reportContent += "<p>Aucune donnée cumulative disponible.</p>";
+                }
+
+                // Ajouter un bouton d'impression en bas du rapport
+                reportContent += `
+                    <button onclick="window.print()" style="
+                        display: block;
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        background-color: #007bff;
+                        color: #fff;
+                        border: none;
+                        cursor: pointer;
+                    ">
+                        Imprimer en PDF
+                    </button>
+                `;
+
+                const reportWindow = window.open("", "_blank");
+                reportWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Rapport du ${data.date}</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; padding: 20px; }
+                                h3 { color: #333; }
+                                h4 { margin-top: 15px; color: #555; }
+                                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                                th, td { padding: 8px; border: 1px solid #ddd; }
+                                th { background-color: #f2f2f2; }
+                                button { font-family: Arial, sans-serif; }
+                            </style>
+                        </head>
+                        <body>${reportContent}</body>
+                    </html>
+                `);
+                reportWindow.document.close();
             }
-        } catch (error) {
-            console.error("Erreur lors de la suppression des données:", error);
-            alert("Une erreur est survenue.");
-        } finally {
-            isProcessing = false;
-        }
-    } else {
-        isProcessing = false; // Libère l'indicateur si l'utilisateur annule
-    }
+        })
+        .catch(error => {
+            console.error("Erreur lors de la génération du rapport:", error);
+        });
 }
+
+
+    async function deleteProduction() {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
+            try {
+                const response = await fetch(`${baseURL}/clear_production`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    alert(data.message);
+                    isProcessing = false;
+                    fetchProduction(); // Recharger les données après suppression
+                } else {
+                    alert("Erreur lors de la suppression des données.");
+                }
+            } catch (error) {
+                console.error("Erreur lors de la suppression des données:", error);
+                alert("Une erreur est survenue.");
+            } finally {
+                isProcessing = false;
+            }
+        } else {
+            isProcessing = false; // Libère l'indicateur si l'utilisateur annule
+        }
+    }
 
 async function deleteProductionByDate(date) {
     if (isProcessing) return;
