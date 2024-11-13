@@ -34,7 +34,7 @@ connected = []
 def index():
     if 'username' in session:
         username = session['username']
-        connected.append(username)
+        #connected.append(username)
         return render_template("index.html",username=username)
     return redirect(url_for('login'))
 
