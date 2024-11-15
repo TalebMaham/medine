@@ -59,7 +59,7 @@ async function fetchProduction() {
     isProcessing = true;
 
     try {
-        const response = await fetch(`//medine/get_production`);
+        const response = await fetch(`/medine/get_production`);
         const data = await response.json();
 
         const dailyProduction = document.getElementById("daily-production");
