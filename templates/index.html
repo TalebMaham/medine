@@ -7,38 +7,6 @@
     <title>Gestion de Production</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-    <script>
-        const baseURL = "{{ url_for('index', _external=True) }}";
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const connectedUsersContainer = document.createElement("div");
-            connectedUsersContainer.id = "connected-users";
-            document.querySelector("header").appendChild(connectedUsersContainer);
-    
-            // Fonction pour obtenir et afficher les utilisateurs connectés
-            function fetchConnectedUsers() {
-                fetch(`${baseURL}/connected`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.connected && data.connected.length > 0) {
-                            connectedUsersContainer.innerHTML = `<p>Utilisateurs connectés : ${data.connected.join(", ")}</p>`;
-                        } else {
-                            connectedUsersContainer.innerHTML = "<p>Aucun utilisateur connecté</p>";
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Erreur lors de la récupération des utilisateurs connectés:", error);
-                    });
-            }
-    
-            // Appel initial pour obtenir les utilisateurs connectés
-            fetchConnectedUsers();
-    
-            // Mettre à jour les utilisateurs connectés toutes les 60 secondes
-            setInterval(fetchConnectedUsers, 60000);
-        });
-    </script>
     
 </head>
 <body>
@@ -51,7 +19,7 @@
             <button onclick="showSection('waste')">Waste</button>
             <button onclick="showSection('report')">Report</button>
             {% if 'username' in session %}
-            <a class="btn btn-primary navlink" href="/logout">Déconnexion</a>
+            <a class="btn btn-primary" href="/medine/logout">Déconnexion</a>
 
             {% endif %}
         </nav>
