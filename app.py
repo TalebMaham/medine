@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-app.config['APPLICATION_ROOT'] = '/medine'
+#app.config['APPLICATION_ROOT'] = '/medine'
 
 # Fichier JSON pour stocker les données de production
 DATA_FILE = 'production_data.json'
