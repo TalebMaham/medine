@@ -45,6 +45,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        print(f"la methode est post est username : {username} et password  : {password}")
 
         if username in users and users[username] == password:
             session['username'] = username

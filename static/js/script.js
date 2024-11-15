@@ -149,6 +149,7 @@ async function updateProduction(date, format, quantity) {
 
         if (data.status === "success") {
             document.getElementById("production-status").innerText = "Production mise à jour avec succès !";
+            isProcessing = false;
             await fetchProduction(); // Recharger les données pour refléter les modifications
         } else {
             alert("Erreur lors de la mise à jour de la production.");
