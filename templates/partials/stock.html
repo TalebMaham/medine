@@ -1,1 +1,43 @@
- 
+{% extends "base.html" %}
+{% block title %}Stock{% endblock %}
+
+{% block content %}
+    <h2 class="text-center mb-4">Stock</h2>
+    <form id="stock-form" class="mb-4">
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+                <label for="stock-date" class="mr-2">Date :</label>
+                <input type="date" id="stock-date" name="date" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <label for="film" class="mr-2">Film :</label>
+                <select id="film" name="film" class="form-control">
+                    <option value="El Medina 500g">El Medina 500g</option>
+                    <option value="Roma 500g">Roma 500g</option>
+                    <option value="El Medina 250g">El Medina 250g</option>
+                    <option value="Roma 250g">Roma 250g</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="entry" class="mr-2">Entrée :</label>
+                <input type="number" id="entry" name="entry" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <label for="used" class="mr-2">Utilisée :</label>
+                <input type="number" id="used" name="used" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <label for="total-x" class="mr-2">Total X :</label>
+                <input type="number" id="total-x" name="total-x" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mt-2">Ajouter</button>
+            </div>
+        </div>
+    </form>
+    <button onclick="clearStock()" class="btn btn-danger mt-2">Supprimer tout</button>
+    <p id="stock" class="text-center text-success"></p>
+
+
+    <p id = "result"></p>
+{% endblock %}

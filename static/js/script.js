@@ -1,5 +1,5 @@
 let isProcessing = false; // Indicateur de traitement en cours
-
+let route = "/medine"
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
     if (isProcessing) return; // Empêche d'autres actions si un traitement est en cours
@@ -14,6 +14,13 @@ function showSection(sectionId) {
         fetchProduction(); 
         setupProductionForm();
     }
+    if (sectionId === 'stock') {
+        getStock();
+        setStock(); 
+
+    }
+
+
 }
 
 function setupProductionForm() {
@@ -28,7 +35,7 @@ function setupProductionForm() {
         const quantity = parseInt(document.getElementById("quantity").value);
 
         try {
-            const response = await fetch(`/medine/add_production`, {
+            const response = await fetch(`${route}/add_production`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ date, format, quantity })
@@ -59,7 +66,7 @@ async function fetchProduction() {
     isProcessing = true;
 
     try {
-        const response = await fetch(`/medine/get_production`);
+        const response = await fetch(`${route}/get_production`);
         const data = await response.json();
 
         const dailyProduction = document.getElementById("daily-production");
@@ -140,7 +147,7 @@ async function updateProduction(date, format, quantity) {
     isProcessing = true;
 
     try {
-        const response = await fetch(`/medine/update_production`, {
+        const response = await fetch(`${route}/update_production`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date, format, quantity: parseInt(quantity) })
@@ -163,7 +170,7 @@ async function updateProduction(date, format, quantity) {
 
 
 function generateReport(date) {
-    fetch(`/medine/generate_report/${date}`)
+    fetch(`${route}/generate_report/${date}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "error") {
@@ -280,7 +287,7 @@ function generateReport(date) {
 
         if (confirm("Êtes-vous sûr de vouloir supprimer toutes les données de production ?")) {
             try {
-                const response = await fetch(`/medine/clear_production`, {
+                const response = await fetch(`${route}/clear_production`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" }
                 });
@@ -309,7 +316,7 @@ async function deleteProductionByDate(date) {
     isProcessing = true;
 
     try {
-        const response = await fetch(`/medine/delete_production_by_date`, {
+        const response = await fetch(`${route}/delete_production_by_date`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date })
