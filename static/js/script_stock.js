@@ -36,7 +36,7 @@ async function setStock() {
 
         try {
             const dailyTotal = await fetchDailyTotal(date);
-            const gaspiage = (totalX * 20 * 0.005) - (dailyTotal * 20 * 0.005);
+            const gaspiage = (totalX * 0.005) - (dailyTotal * 20 * 0.005);
 
             const payload = {
                 date: date,
