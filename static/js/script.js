@@ -1,5 +1,5 @@
 let isProcessing = false; // Indicateur de traitement en cours
-let route = "/medine"
+let route = ""
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
     if (isProcessing) return; // Empêche d'autres actions si un traitement est en cours

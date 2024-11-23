@@ -9,7 +9,7 @@ app.config.from_object(Config)
 
 users = {
     "abidine": "abidinepassword",
-    "sidna": "sidnapassword"
+    "sidi": "sidiapassword"
 }
 
 @app.route("/")
