@@ -3,13 +3,15 @@ from flask import Flask, json, jsonify, request, session, redirect, url_for, fla
 from production.production import add_production, get_production, update_production, generate_report, clear_production, delete_production_by_date
 from config import Config
 from production.production_reader import get_daily_total
-
+import requests
 app = Flask(__name__)
 app.config.from_object(Config)
 
+API_BASE_URL = "http://localhost:8000/api/productions/"
+
 users = {
     "abidine": "abidinepassword",
-    "sidi": "sidiapassword"
+    "sidi": "sidipassword"
 }
 
 @app.route("/")
@@ -43,39 +45,168 @@ def logout():
 
 @app.route("/add_production", methods=["POST"])
 def add_production_route():
-    return add_production(app.config['DATA_FILE'])
+    try:
+        # Récupérer les données envoyées par la requête
+        production_id = request.json.get("id")
+        date = request.json.get("date")
+        format_name = request.json.get("format_name")
+        quantity = request.json.get("quantity")
+
+        # Vérifier que les champs nécessaires sont présents
+        if not (date and format_name and quantity is not None):
+            return jsonify({"status": "error", "message": "Données incomplètes."}), 400
+
+        if production_id:
+            # Mise à jour de la production existante
+            response = requests.patch(
+                f"{API_BASE_URL}/{production_id}/",
+                json={"date": date, "format_name": format_name, "quantity": quantity}
+            )
+        else:
+            # Ajout d'une nouvelle production
+            response = requests.post(
+                API_BASE_URL,
+                json={"date": date, "format_name": format_name, "quantity": quantity}
+            )
+
+        if response.status_code in (200, 201, 204):
+            return jsonify({"status": "success", "message": "Opération réussie."}), response.status_code
+        else:
+            return jsonify({"status": "error", "message": response.json()}), response.status_code
+
+    except requests.RequestException as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 @app.route("/get_production", methods=["GET"])
 def get_production_route():
-    return get_production(app.config['DATA_FILE'])
+    try:
+        # Récupérer les données brutes de l'API
+        response = requests.get(API_BASE_URL)
+        if response.status_code != 200:
+            return jsonify({"status": "error", "message": "Erreur lors de la récupération des données."}), response.status_code
+
+        data = response.json()
+        return jsonify(perform_calculations(data))
+    except requests.RequestException as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+def perform_calculations(data):
+    """
+    Effectue les calculs demandés (totaux journaliers, cumulés, pourcentages).
+    """
+    daily_totals = {}
+    cumulative_totals = {}
+    total_global = 0
+
+    # Regrouper les données par date et format_name
+    for production in data:
+        date = production['date']
+        format_name = production['format_name']
+        quantity = production['quantity']
+
+        # Totaux journaliers
+        if date not in daily_totals:
+            daily_totals[date] = {"formats": {}, "total": 0}
+
+        if format_name not in daily_totals[date]["formats"]:
+            daily_totals[date]["formats"][format_name] = 0
+
+        daily_totals[date]["formats"][format_name] += quantity
+        daily_totals[date]["total"] += quantity
+
+        # Totaux cumulés
+        if format_name not in cumulative_totals:
+            cumulative_totals[format_name] = 0
+
+        cumulative_totals[format_name] += quantity
+
+        total_global += quantity
+
+    # Calculer les pourcentages
+    percentages = [
+        {
+            "format_name": format_name,
+            "percentage": round((quantity / total_global) * 100, 2) if total_global > 0 else 0
+        }
+        for format_name, quantity in cumulative_totals.items()
+    ]
+
+    return {
+        "daily_totals": daily_totals,
+        "cumulative_totals": [{"format_name": k, "total_quantity": v} for k, v in cumulative_totals.items()],
+        "percentages": percentages
+    }
+
 
 @app.route("/update_production", methods=["POST"])
 def update_production_route():
-    return update_production(app.config['DATA_FILE'])
+    production_id = request.json.get("id")
+    if not production_id:
+        return jsonify({"status": "error", "message": "ID manquant"}), 400
+    try:
+        response = requests.put(
+            f"{API_BASE_URL}/{production_id}/+",
+            json=request.json
+        )
+        return jsonify(response.json()), response.status_code
+    except requests.RequestException as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/generate_report/<date>")
 def generate_report_route(date):
-    return generate_report(app.config['DATA_FILE'], date)
+    # Cette logique doit être réadaptée si Django doit aussi générer un rapport
+    return jsonify({"status": "success", "message": f"Rapport généré pour {date}"}), 200
 
 @app.route("/clear_production", methods=["POST"])
 def clear_production_route():
-    return clear_production(app.config['DATA_FILE'])
+    try:
+        response = requests.delete(API_BASE_URL)
+        return jsonify({"status": "success"}), 204
+    except requests.RequestException as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route("/delete_production_by_date", methods=["POST"])
+@app.route("/delete_production_by_date", methods=["DELETE"])
 def delete_production_by_date_route():
-    return delete_production_by_date(app.config['DATA_FILE'])
+    date = request.args.get("date")  # Récupérer la date depuis les paramètres de la requête
+    if not date:
+        return jsonify({"status": "error", "message": "Date manquante"}), 400
+
+    try:
+        # Envoyer la requête DELETE à l'API Django
+        response = requests.delete(
+            "http://localhost:8000/api/productions-delete-by-date/delete_by_date/",
+            params={"date": date},
+            timeout=10  # Ajouter un timeout explicite
+        )
+        
+        if response.status_code == 204:
+            return jsonify({"status": "success", "message": f"Productions supprimées pour la date {date}."}), 204
+        else:
+            # Retourner le message d'erreur de l'API Django
+            return jsonify({"status": "error", "message": response.json()}), response.status_code
+
+    except requests.ConnectionError:
+        return jsonify({"status": "error", "message": "Impossible de se connecter au serveur Django."}), 500
+    except requests.Timeout:
+        return jsonify({"status": "error", "message": "La requête à l'API Django a expiré."}), 504
+    except requests.RequestException as e:
+        # Gestion générique pour les autres erreurs réseau
+        return jsonify({"status": "error", "message": f"Erreur de réseau : {str(e)}"}), 500
+
 
 
 @app.route('/daily-total', methods=['GET'])
 def daily_total():
-    data_file = app.config['DATA_FILE']
     date = request.args.get('date')
-    
     if not date:
         return jsonify({"status": "error", "message": "Date is required"}), 400
-    
-    return get_daily_total(data_file, date)
-
+    try:
+        response = requests.get(f"{API_BASE_URL}?date={date}")
+        return jsonify(response.json()), response.status_code
+    except requests.RequestException as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 DATA_FILE_STOCK = "data_stock.json"
 # Charger les données

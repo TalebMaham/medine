@@ -31,26 +31,26 @@ function setupProductionForm() {
         isProcessing = true; // Marque le début du traitement
 
         const date = document.getElementById("date").value;
-        const format = document.getElementById("format").value;
+        const format_name = document.getElementById("format_name").value;
         const quantity = parseInt(document.getElementById("quantity").value);
 
         try {
             const response = await fetch(`${route}/add_production`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ date, format, quantity })
+                body: JSON.stringify({ date, format_name, quantity })
             });
             const data = await response.json();
 
-            if (data.status === "success") {
+            if (response.ok && data.status === "success") {
                 showSuccessToast("Produit ajouté avec succès !");
                 document.getElementById("quantity").value = "";
                 document.getElementById("date").value = ""; // Réinitialise la date après l'ajout
-                isProcessing = false; 
-                fetchProduction();
-                
+                isProcessing = false;
+                fetchProduction(); // Actualise la liste des productions
             } else {
-                document.getElementById("production-status").innerText = "Erreur lors de l'ajout de la production.";
+                console.error("Erreur lors de l'ajout de la production:", data.message || "Erreur inconnue");
+                document.getElementById("production-status").innerText = data.message || "Erreur lors de l'ajout de la production.";
             }
         } catch (error) {
             console.error("Erreur lors de l'ajout de la production:", error);
@@ -60,6 +60,7 @@ function setupProductionForm() {
         }
     });
 }
+
 
 async function fetchProduction() {
     if (isProcessing) return;
@@ -72,7 +73,8 @@ async function fetchProduction() {
         const dailyProduction = document.getElementById("daily-production");
         dailyProduction.innerHTML = "";
 
-        for (const [date, formats] of Object.entries(data.daily_totals)) {
+        // Parcourir les totaux journaliers
+        for (const [date, details] of Object.entries(data.daily_totals)) {
             let dateSection = document.createElement("div");
             dateSection.className = "mb-3";
             dateSection.innerHTML = `<h5>${date}</h5>`;
@@ -80,22 +82,22 @@ async function fetchProduction() {
             let formatList = document.createElement("ul");
             formatList.className = "list-group";
 
-            for (const [format, quantity] of Object.entries(formats)) {
-                if (format !== "total") {
-                    const listItem = document.createElement("li");
-                    listItem.className = "list-group-item d-flex justify-content-between align-items-center";
-                    listItem.innerHTML = `
-                        ${format}: 
-                        <input type="number" class="form-control w-25 mr-2" value="${quantity}" 
-                               onchange="updateProduction('${date}', '${format}', this.value)">
-                    `;
-                    formatList.appendChild(listItem);
-                }
+            // Parcourir les formats pour une date spécifique
+            for (const [format_name, quantity] of Object.entries(details.formats)) {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                listItem.innerHTML = `
+                    ${format_name}: 
+                    <input type="number" class="form-control w-25 mr-2" value="${quantity}" 
+                           onchange="updateProduction('${date}', '${format_name}', this.value)">
+                `;
+                formatList.appendChild(listItem);
             }
 
+            // Ajouter le total du jour
             const totalItem = document.createElement("li");
             totalItem.className = "list-group-item font-weight-bold";
-            totalItem.innerHTML = `Total du jour: ${formats.total}`;
+            totalItem.innerHTML = `Total du jour: ${details.total}`;
             formatList.appendChild(totalItem);
 
             dateSection.appendChild(formatList);
@@ -117,23 +119,26 @@ async function fetchProduction() {
             dailyProduction.appendChild(dateSection);
         }
 
+        // Mettre à jour les totaux cumulés
         const cumulativeTotals = document.getElementById("cumulative-totals");
         cumulativeTotals.innerHTML = "";
-        for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
+        for (const item of data.cumulative_totals) {
             const listItem = document.createElement("li");
             listItem.className = "list-group-item";
-            listItem.innerText = `${format}: ${quantity}`;
+            listItem.innerText = `${item.format_name}: ${item.total_quantity}`;
             cumulativeTotals.appendChild(listItem);
         }
 
+        // Mettre à jour les pourcentages
         const percentages = document.getElementById("percentages");
         percentages.innerHTML = "";
-        for (const [format, percentage] of Object.entries(data.percentages)) {
+        for (const item of data.percentages) {
             const listItem = document.createElement("li");
             listItem.className = "list-group-item";
-            listItem.innerText = `${format}: ${percentage}%`;
+            listItem.innerText = `${item.format_name}: ${item.percentage}%`;
             percentages.appendChild(listItem);
         }
+
     } catch (error) {
         console.error("Erreur lors de la récupération des données de production:", error);
         document.getElementById("daily-production").innerText = "Erreur lors de la récupération des données.";
@@ -142,7 +147,8 @@ async function fetchProduction() {
     }
 }
 
-async function updateProduction(date, format, quantity) {
+
+async function updateProduction(date, format_name, quantity) {
     if (isProcessing) return;
     isProcessing = true;
 
@@ -150,7 +156,7 @@ async function updateProduction(date, format, quantity) {
         const response = await fetch(`${route}/update_production`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ date, format, quantity: parseInt(quantity) })
+            body: JSON.stringify({ date, format_name, quantity: parseInt(quantity) })
         });
         const data = await response.json();
 
@@ -192,10 +198,10 @@ function generateReport(date) {
                             </thead>
                             <tbody>
                     `;
-                    for (const [format, quantity] of Object.entries(data.daily_data)) {
+                    for (const [format_name, quantity] of Object.entries(data.daily_data)) {
                         reportContent += `
                             <tr>
-                                <td>${format}</td>
+                                <td>${format_name}</td>
                                 <td>${quantity}</td>
                             </tr>
                         `;
@@ -217,11 +223,11 @@ function generateReport(date) {
                             </thead>
                             <tbody>
                     `;
-                    for (const [format, quantity] of Object.entries(data.cumulative_totals)) {
-                        const percentage = data.percentages[format] ? `${data.percentages[format]}%` : "0%";
+                    for (const [format_name, quantity] of Object.entries(data.cumulative_totals)) {
+                        const percentage = data.percentages[format_name] ? `${data.percentages[format_name]}%` : "0%";
                         reportContent += `
                             <tr>
-                                <td>${format}</td>
+                                <td>${format_name}</td>
                                 <td>${quantity}</td>
                                 <td>${percentage}</td>
                             </tr>
@@ -311,32 +317,41 @@ function generateReport(date) {
         }
     }
 
-async function deleteProductionByDate(date) {
-    if (isProcessing) return;
-    isProcessing = true;
-
-    try {
-        const response = await fetch(`${route}/delete_production_by_date`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ date })
-        });
-        const data = await response.json();
-
-        if (data.status === "success") {
-            alert(`Données supprimées pour la date ${date}.`);
-            isProcessing = false ; 
-            await fetchProduction(); // Rafraîchir la liste de production après suppression
-        } else {
-            alert(data.message);
+    async function deleteProductionByDate(date) {
+        if (isProcessing) return; // Évite les requêtes multiples simultanées
+        isProcessing = true;
+    
+        try {
+            const response = await fetch(`${route}/delete_production_by_date?date=${encodeURIComponent(date)}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+    
+            // Vérification si le statut HTTP est 204 (aucun contenu attendu)
+            if (response.status === 204) {
+                alert(`Données supprimées pour la date ${date}.`);
+                isProcessing = false; 
+                await fetchProduction(); // Rafraîchir la liste de production après suppression
+                return; // Sortir car il n'y a pas de JSON à traiter
+            }
+    
+            // Pour les autres statuts, essayer de lire la réponse JSON
+            const data = await response.json();
+            if (data.status === "success") {
+                alert(`Données supprimées pour la date ${date}.`);
+                isProcessing = false; 
+                await fetchProduction(); // Rafraîchir la liste de production après suppression
+            } else {
+                alert(data.message || "Erreur inconnue."); // Gère les messages d'erreur
+            }
+        } catch (error) {
+            console.error("Erreur lors de la suppression des données:", error);
+            alert("Erreur lors de la suppression des données.");
+        } finally {
+            isProcessing = false; // Réinitialise le drapeau de traitement
         }
-    } catch (error) {
-        console.error("Erreur lors de la suppression des données:", error);
-        alert("Erreur lors de la suppression des données.");
-    } finally {
-        isProcessing = false;
     }
-}
+    
 
 async function showSuccessToast(message) {
     const toast = document.createElement("div");
