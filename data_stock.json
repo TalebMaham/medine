@@ -1,1 +1,11 @@
-{}
+{
+    "2024-11-08": {
+        "entry": 120,
+        "film": "Roma 500g",
+        "gaspiage": -479.51,
+        "stock_cumule": 479.51,
+        "stock_initial": 0,
+        "total_x": 1457,
+        "used": 120
+    }
+}

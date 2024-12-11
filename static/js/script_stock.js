@@ -2,19 +2,22 @@
 base_url_in_prod = ""
 
 
-async function fetchDailyTotal(date) {
+async function fetchDailyTotal(date, film) {
     try {
-        const response = await fetch(`${base_url_in_prod}/daily-total?date=${encodeURIComponent(date)}`);
+        const url = `${base_url_in_prod}/daily-total?date=${encodeURIComponent(date)}&format_name=${encodeURIComponent(film)}`;
+        const response = await fetch(url);
+
         if (!response.ok) {
             const result = await response.json();
             alert(`Erreur dans la réponse Daily Total : ${result.message}`);
             throw new Error(`Erreur HTTP ${response.status}`);
         }
+
         const result = await response.json();
-        return result.daily_total || 0;
+        return result.daily_total || 0; // Renvoie 0 si aucune donnée
     } catch (error) {
         alert("Impossible de récupérer le Daily total de la production.");
-        throw error; // Arrêt immédiat
+        throw error; // Arrêt immédiat en cas d'erreur
     }
 }
 
@@ -26,28 +29,26 @@ async function setStock() {
         const date = document.getElementById("stock-date").value;
         const film = document.getElementById("film").value;
         const entry = parseInt(document.getElementById("entry").value);
-        const used = parseInt(document.getElementById("used").value);
-        const totalX = parseInt(document.getElementById("total-x").value);
+        const machine1 = parseInt(document.getElementById("machine-1").value);
+        const machine2 = parseInt(document.getElementById("machine-2").value);
 
-        if (!date || !film || isNaN(entry) || isNaN(used) || isNaN(totalX)) {
+        if (!date || !film || isNaN(entry) || isNaN(machine1) || isNaN(machine2)) {
             alert("Tous les champs sont obligatoires.");
             return;
         }
 
         try {
-            const dailyTotal = await fetchDailyTotal(date);
-            const gaspiage = (totalX * 0.005) - (dailyTotal * 20 * 0.005);
-
+            // Préparer les données à envoyer
             const payload = {
                 date: date,
                 film: film,
                 entry: entry,
-                used: used,
-                total_x: totalX,
-                gaspiage: parseFloat(gaspiage.toFixed(2))
+                machine1: machine1,
+                machine2: machine2
             };
 
-            const response = await fetch(`${base_url_in_prod}/setStock`, {
+            // Envoyer les données au backend
+            const response = await fetch('/setStock', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -58,18 +59,23 @@ async function setStock() {
             const result = await response.json();
 
             if (!response.ok) {
-                alert(`Erreur lors de l'enregistrement du stock : ${result.message}`);
-                throw new Error(`Erreur HTTP ${response.status}`);
+                alert(`Erreur : ${result.message}`);
+                return;
             }
 
+            // Afficher un message de confirmation
             alert("Stock enregistré avec succès !");
-            console.log("Données enregistrées :", result);
-            getStock(); // Met à jour le tableau après l'enregistrement
+            console.log("Données enregistrées :", result.data);
+            getStock();
+
         } catch (error) {
-            console.error("Erreur lors de l'enregistrement du stock :", error);
+            console.error("Erreur :", error);
+            alert("Une erreur est survenue.");
         }
     });
 }
+
+
 
 
 async function getStock() {
@@ -94,36 +100,36 @@ async function getStock() {
         }
 
         let tableHTML = `
-            <table class="table table-bordered table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Date</th>
-                        <th>Film</th>
-                        <th>Entrées</th>
-                        <th>Utilisé</th>
-                        <th>Total X</th>
-                        <th>Gaspiage</th>
-                        <th>Stock Initial</th>
-                        <th>Stock Cumulé</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        for (const [date, details] of Object.entries(stockData)) {
-            tableHTML += `
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
                 <tr>
-                    <td>${date}</td>
-                    <td>${details.film}</td>
-                    <td>${details.entry}</td>
-                    <td>${details.used}</td>
-                    <td>${details.total_x}</td>
-                    <td>${details.gaspiage.toFixed(2)}</td>
-                    <td>${details.stock_initial.toFixed(2)}</td>
-                    <td>${details.stock_cumule.toFixed(2)}</td>
+                    <th>Date</th>
+                    <th>Film</th>
+                    <th>Entrées</th>
+                    <th>Machine 1</th>
+                    <th>Machine 2</th>
+                    <th>Gaspiage</th>
+                    <th>Stock Initial</th>
+                    <th>Stock Cumulé</th>
                 </tr>
-            `;
-        }
+            </thead>
+            <tbody>
+    `;
+    
+    for (const [date, details] of Object.entries(stockData)) {
+        tableHTML += `
+            <tr>
+                <td>${date}</td>
+                <td>${details.film}</td>
+                <td>${details.entry}</td>
+                <td>${details.machine1}</td>
+                <td>${details.machine2}</td>
+                <td>${details.gaspiage.toFixed(2)}</td>
+                <td>${details.stock_initial.toFixed(2)}</td>
+                <td>${details.stock_cumule.toFixed(2)}</td>
+            </tr>
+        `;
+    }
 
         tableHTML += `
                 </tbody>

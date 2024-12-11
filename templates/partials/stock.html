@@ -12,10 +12,10 @@
             <div class="col-auto">
                 <label for="film" class="mr-2">Film :</label>
                 <select id="film" name="film" class="form-control">
-                    <option value="El Medina 500g">El Medina 500g</option>
-                    <option value="Roma 500g">Roma 500g</option>
-                    <option value="El Medina 250g">El Medina 250g</option>
-                    <option value="Roma 250g">Roma 250g</option>
+                    <option value="El_Medina_500g">El Medina 500g</option>
+                    <option value="Roma_500g">Roma 500g</option>
+                    <option value="El_Medina 250g">El Medina 250g</option>
+                    <option value="Roma_250g">Roma 250g</option>
                 </select>
             </div>
             <div class="col-auto">
@@ -23,18 +23,19 @@
                 <input type="number" id="entry" name="entry" class="form-control" required>
             </div>
             <div class="col-auto">
-                <label for="used" class="mr-2">Utilisée :</label>
-                <input type="number" id="used" name="used" class="form-control" required>
+                <label for="machine-1" class="mr-2">Machine 1 :</label>
+                <input type="number" id="machine-1" name="machine-1" class="form-control" required>
             </div>
             <div class="col-auto">
-                <label for="total-x" class="mr-2">Total X :</label>
-                <input type="number" id="total-x" name="total-x" class="form-control" required>
+                <label for="machine-2" class="mr-2">Machine 2 :</label>
+                <input type="number" id="machine-2" name="machine-2" class="form-control" required>
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary mt-2">Ajouter</button>
             </div>
         </div>
     </form>
+
     <button onclick="clearStock()" class="btn btn-danger mt-2">Supprimer tout</button>
     <p id="stock" class="text-center text-success"></p>
 
