@@ -22,7 +22,7 @@ from flask import jsonify
 API_BASE_URL = "https://chri2.com/medineapi/api/stock/"
 
 # Identifiants d'authentification
-AUTH = HTTPBasicAuth('Sidi', 'sidipassword')
+AUTH = HTTPBasicAuth('sidi', 'sidipassword')
 
 @use_args(stock_args, location="json")
 def set_stock_route(args):
