@@ -1,5 +1,5 @@
 
-base_url_in_prod = "medine"
+base_url_in_prod = "/medine"
 
 
 
