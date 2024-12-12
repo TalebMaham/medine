@@ -18,7 +18,7 @@ from flask import jsonify
 
 
 # URL de l'API Django
-# API_URL = "http://127.0.0.1:8000/api/stock/"
+# API_BASE_URL = "http://127.0.0.1:8000/api/stock/"
 API_BASE_URL = "https://chri2.com/medineapi/api/stock/"
 
 # Identifiants d'authentification
@@ -41,7 +41,7 @@ def set_stock_route(args):
         }
         
         # Envoyer la requête POST à l'API Django avec l'authentification
-        response = requests.post(API_URL, json=data, auth=AUTH)
+        response = requests.post(API_BASE_URL, json=data, auth=AUTH)
 
         # Vérifiez si la réponse est réussie (statut 2xx)
         if response.status_code in [200, 201]:
@@ -60,7 +60,7 @@ def get_stock_route():
     """
     try:
         # Envoyer la requête GET à l'API Django avec l'authentification
-        response = requests.get(API_URL, auth=AUTH)
+        response = requests.get(API_BASE_URL, auth=AUTH)
 
         # Vérifiez si la réponse est réussie (statut 2xx)
         if response.status_code == 200:
@@ -82,7 +82,7 @@ def clear_stock_route():
     """
     try:
         # Étape 1 : Obtenez la liste de tous les stocks
-        response = requests.get(API_URL, auth=AUTH)
+        response = requests.get(API_BASE_URL, auth=AUTH)
 
         if response.status_code != 200:
             return jsonify({"message": f"Erreur lors de la récupération des stocks : {response.status_code}"}), response.status_code
@@ -93,7 +93,7 @@ def clear_stock_route():
         # Étape 2 : Supprimez chaque stock individuellement
         for stock in stock_list:
             stock_id = stock['id']
-            delete_url = f"{API_URL}{stock_id}/"
+            delete_url = f"{API_BASE_URL}{stock_id}/"
             delete_response = requests.delete(delete_url, auth=AUTH)
             
             if delete_response.status_code in [200, 204]:
