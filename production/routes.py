@@ -5,7 +5,7 @@ from .utils import perform_calculations
 
 API_BASE_URL = "https://chri2.com/medineapi/api/productions/"
 #API_BASE_URL = "http://127.0.0.1:8000/api/productions/"
-AUTH = HTTPBasicAuth('Sidi', 'sidipassword')  # Identifiants pour Basic Auth
+AUTH = HTTPBasicAuth('sidi', 'sidipassword')  # Identifiants pour Basic Auth
 
 def add_production_route():
     try:
