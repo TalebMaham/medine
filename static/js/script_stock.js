@@ -61,7 +61,9 @@ async function setStock() {
             console.log("Payload envoyé :", JSON.stringify(payload));
 
 
-            const response = await fetch('/set_stock', {
+            const url =  `${base_url_in_prod}/set_stock`;
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
