@@ -4,7 +4,8 @@ from requests.auth import HTTPBasicAuth
 from .utils import perform_calculations
 
 API_BASE_URL = "https://chri2.com/medineapi/api/productions/"
-AUTH = HTTPBasicAuth('sidi', 'sidipassword')  # Identifiants pour Basic Auth
+API_BASE_URL = "http://127.0.0.1:8000/api/productions/"
+AUTH = HTTPBasicAuth('Sidi', 'sidipassword')  # Identifiants pour Basic Auth
 
 def add_production_route():
     try:
@@ -122,7 +123,7 @@ def daily_total():
         response = requests.get(f"{API_BASE_URL}?date={date}&format_name={format_name}", auth=AUTH)
         if response.status_code != 200:
             return jsonify({"status": "error", "message": response.json().get("message", "Unknown error")}), response.status_code
-
+        print(f"response : {response.json()}")
         return jsonify(response.json()), response.status_code
     except requests.RequestException as e:
         return jsonify({"status": "error", "message": str(e)}), 500

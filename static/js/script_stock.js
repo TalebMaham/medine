@@ -2,6 +2,8 @@
 base_url_in_prod = ""
 
 
+
+
 async function fetchDailyTotal(date, film) {
     try {
         const url = `${base_url_in_prod}/daily-total?date=${encodeURIComponent(date)}&format_name=${encodeURIComponent(film)}`;
@@ -14,12 +16,14 @@ async function fetchDailyTotal(date, film) {
         }
 
         const result = await response.json();
-        return result.daily_total || 0; // Renvoie 0 si aucune donnée
+        const dailyTotal = result.length > 0 ? result[0].quantity : 0; // Extraire la quantité de la première entrée de la liste
+        return dailyTotal; // Renvoie 0 si aucune donnée n'est trouvée
     } catch (error) {
         alert("Impossible de récupérer le Daily total de la production.");
         throw error; // Arrêt immédiat en cas d'erreur
     }
 }
+
 
 
 async function setStock() {
@@ -38,17 +42,26 @@ async function setStock() {
         }
 
         try {
-            // Préparer les données à envoyer
+            // Vérifier la production du jour pour le film
+            const dailyTotal = await fetchDailyTotal(date, film);
+            if (dailyTotal === 0) {
+                alert("Aucune production trouvée pour ce jour avec ce type de film.");
+                return;
+            }
+
+            // Passer la quantité reçue (entry) dans la requête POST
             const payload = {
                 date: date,
                 film: film,
                 entry: entry,
                 machine1: machine1,
-                machine2: machine2
+                machine2: machine2,
+                dailyTotal : dailyTotal // Passer la quantité obtenue de la production
             };
+            console.log("Payload envoyé :", JSON.stringify(payload));
 
-            // Envoyer les données au backend
-            const response = await fetch('/setStock', {
+
+            const response = await fetch('/set_stock', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -63,7 +76,6 @@ async function setStock() {
                 return;
             }
 
-            // Afficher un message de confirmation
             alert("Stock enregistré avec succès !");
             console.log("Données enregistrées :", result.data);
             getStock();
@@ -80,7 +92,7 @@ async function setStock() {
 
 async function getStock() {
     try {
-        const response = await fetch(`${base_url_in_prod}/getStock`);
+        const response = await fetch(`${base_url_in_prod}/get_stock`);
         const result = await response.json();
 
         if (!response.ok) {
@@ -103,22 +115,26 @@ async function getStock() {
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
+                    <th>ID</th>
                     <th>Date</th>
                     <th>Film</th>
                     <th>Entrées</th>
                     <th>Machine 1</th>
                     <th>Machine 2</th>
-                    <th>Gaspiage</th>
+                    <th>Gaspillage</th>
                     <th>Stock Initial</th>
                     <th>Stock Cumulé</th>
                 </tr>
             </thead>
             <tbody>
     `;
-    
-    for (const [date, details] of Object.entries(stockData)) {
+
+    for (const details of stockData) {
+        const id = details.id; // Premier champ
+        const date = details.date; // Deuxième champ
         tableHTML += `
             <tr>
+                <td>${id}</td>
                 <td>${date}</td>
                 <td>${details.film}</td>
                 <td>${details.entry}</td>
@@ -143,13 +159,14 @@ async function getStock() {
     }
 }
 
+
 async function clearStock() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer tout le stock ? Cette action est irréversible.")) {
         return;
     }
 
     try {
-        const response = await fetch(`${base_url_in_prod}/clearStock`, {
+        const response = await fetch(`${base_url_in_prod}/clear_stock`, {
             method: 'DELETE'
         });
 
