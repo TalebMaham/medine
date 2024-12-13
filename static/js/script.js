@@ -1,5 +1,17 @@
 let isProcessing = false; // Indicateur de traitement en cours
-let route = "/medine"
+let route = "/medine";
+
+let productionDataCache = []; // Cache des données de production pour la recherche côté front
+
+// Liste des formats limités
+const limitedFormats = [
+    'El_Medina_500g',
+    'Roma_500g',
+    'El_Medina_250g',
+    'Roma_250g'
+];
+
+
 // Fonction pour afficher la section demandée et masquer les autres
 function showSection(sectionId) {
     if (isProcessing) return; // Empêche d'autres actions si un traitement est en cours
@@ -11,13 +23,12 @@ function showSection(sectionId) {
     document.getElementById(sectionId).style.display = 'block';
 
     if (sectionId === 'production') {
-        fetchProduction(); 
+        fetchAllProduction(); 
         setupProductionForm();
     }
     if (sectionId === 'stock') {
         getStock();
         setStock(); 
-
     }
     body.style.background = 'none';
 }
@@ -46,7 +57,7 @@ function setupProductionForm() {
                 document.getElementById("quantity").value = "";
                 document.getElementById("date").value = ""; // Réinitialise la date après l'ajout
                 isProcessing = false;
-                fetchProduction(); // Actualise la liste des productions
+                fetchAllProduction(); // Actualise la liste des productions
             } else {
                 console.error("Erreur lors de l'ajout de la production:", data.message || "Erreur inconnue");
                 document.getElementById("production-status").innerText = data.message || "Erreur lors de l'ajout de la production.";
@@ -60,84 +71,68 @@ function setupProductionForm() {
     });
 }
 
-
-async function fetchProduction() {
+// Méthode pour afficher toutes les données de production avec champs de recherche limités
+async function fetchAllProduction() {
     if (isProcessing) return;
     isProcessing = true;
 
     try {
+        // Récupérer et afficher toutes les données de production
         const response = await fetch(`${route}/get_production`);
         const data = await response.json();
+        productionDataCache = data; // Mettre en cache les données pour la recherche côté front
 
-        const dailyProduction = document.getElementById("daily-production");
-        dailyProduction.innerHTML = "";
+        // Créer le conteneur de recherche (uniquement si non existant)
+        const searchContainer = document.getElementById('search-container');
+        if (!searchContainer) {
+            const newSearchContainer = document.createElement('div');
+            newSearchContainer.id = 'search-container';
+            newSearchContainer.className = 'mb-4 d-flex align-items-center';
 
-        // Parcourir les totaux journaliers
-        for (const [date, details] of Object.entries(data.daily_totals)) {
-            let dateSection = document.createElement("div");
-            dateSection.className = "mb-3";
-            dateSection.innerHTML = `<h5>${date}</h5>`;
+            // Champ de recherche par date (Input date)
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.id = 'search-date';
+            dateInput.className = 'form-control mr-2';
+            dateInput.placeholder = 'Date de production';
 
-            let formatList = document.createElement("ul");
-            formatList.className = "list-group";
+            // Limiter les dates disponibles à celles présentes dans les données
+            const uniqueDates = Array.from(new Set(Object.keys(data.daily_totals)));
+            dateInput.min = uniqueDates[0]; // Date minimum
+            dateInput.max = uniqueDates[uniqueDates.length - 1]; // Date maximum
 
-            // Parcourir les formats pour une date spécifique
-            for (const [format_name, quantity] of Object.entries(details.formats)) {
-                const listItem = document.createElement("li");
-                listItem.className = "list-group-item d-flex justify-content-between align-items-center";
-                listItem.innerHTML = `
-                    ${format_name}: 
-                    <input type="number" class="form-control w-25 mr-2" value="${quantity}" 
-                           onchange="updateProduction('${date}', '${format_name}', this.value)">
-                `;
-                formatList.appendChild(listItem);
-            }
+            // Champ de recherche par format (Select)
+            const formatSelect = document.createElement('select');
+            formatSelect.id = 'search-format';
+            formatSelect.className = 'form-control mr-2';
+            formatSelect.innerHTML = `<option value="">Tous les formats</option>`;
 
-            // Ajouter le total du jour
-            const totalItem = document.createElement("li");
-            totalItem.className = "list-group-item font-weight-bold";
-            totalItem.innerHTML = `Total du jour: ${details.total}`;
-            formatList.appendChild(totalItem);
+            // Limiter les options de format à celles spécifiées
+            limitedFormats.forEach(format => {
+                const option = document.createElement('option');
+                option.value = format;
+                option.textContent = format.replace(/_/g, ' '); // Affichage plus lisible
+                formatSelect.appendChild(option);
+            });
 
-            dateSection.appendChild(formatList);
+            // Bouton de recherche
+            const searchButton = document.createElement('button');
+            searchButton.className = 'btn btn-primary';
+            searchButton.textContent = 'Rechercher';
+            searchButton.onclick = filterProductionData;
 
-            // Bouton Générer rapport
-            const generateButton = document.createElement("button");
-            generateButton.className = "btn btn-outline-primary mt-2 mr-2";
-            generateButton.textContent = "Générer le rapport";
-            generateButton.onclick = () => generateReport(date);
-            dateSection.appendChild(generateButton);
+            // Ajouter les champs de recherche et le bouton au conteneur
+            newSearchContainer.appendChild(dateInput);
+            newSearchContainer.appendChild(formatSelect);
+            newSearchContainer.appendChild(searchButton);
 
-            // Bouton Supprimer
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "btn btn-outline-danger mt-2";
-            deleteButton.textContent = "Supprimer";
-            deleteButton.onclick = () => deleteProductionByDate(date);
-            dateSection.appendChild(deleteButton);
-
-            dailyProduction.appendChild(dateSection);
+            // Ajouter le conteneur au DOM avant la section de production
+            const dailyProduction = document.getElementById('daily-production');
+            dailyProduction.parentNode.insertBefore(newSearchContainer, dailyProduction);
         }
 
-        // Mettre à jour les totaux cumulés
-        const cumulativeTotals = document.getElementById("cumulative-totals");
-        cumulativeTotals.innerHTML = "";
-        for (const item of data.cumulative_totals) {
-            const listItem = document.createElement("li");
-            listItem.className = "list-group-item";
-            listItem.innerText = `${item.format_name}: ${item.total_quantity}`;
-            cumulativeTotals.appendChild(listItem);
-        }
-
-        // Mettre à jour les pourcentages
-        const percentages = document.getElementById("percentages");
-        percentages.innerHTML = "";
-        for (const item of data.percentages) {
-            const listItem = document.createElement("li");
-            listItem.className = "list-group-item";
-            listItem.innerText = `${item.format_name}: ${item.percentage}%`;
-            percentages.appendChild(listItem);
-        }
-
+        // Afficher toutes les données de production
+        displayProductionData(data);
     } catch (error) {
         console.error("Erreur lors de la récupération des données de production:", error);
         document.getElementById("daily-production").innerText = "Erreur lors de la récupération des données.";
@@ -145,6 +140,88 @@ async function fetchProduction() {
         isProcessing = false;
     }
 }
+
+
+// Méthode pour filtrer les données de production au niveau du front
+function filterProductionData() {
+    const date = document.getElementById('search-date').value;
+    const format = document.getElementById('search-format').value;
+
+    let filteredData = JSON.parse(JSON.stringify(productionDataCache)); // Cloner les données en cache
+
+    // Filtrer par date si une date est sélectionnée
+    if (date) {
+        filteredData.daily_totals = Object.fromEntries(
+            Object.entries(filteredData.daily_totals).filter(([key]) => key === date)
+        );
+    }
+
+    // Filtrer par format si un format est sélectionné
+    if (format) {
+        for (const [date, details] of Object.entries(filteredData.daily_totals)) {
+            const filteredFormats = Object.fromEntries(
+                Object.entries(details.formats).filter(([formatName]) => formatName === format)
+            );
+            filteredData.daily_totals[date].formats = filteredFormats;
+        }
+    }
+
+    // Afficher les données filtrées
+    displayProductionData(filteredData);
+}
+
+// Fonction commune pour afficher les données de production
+function displayProductionData(data) {
+    const dailyProduction = document.getElementById("daily-production");
+    dailyProduction.innerHTML = "";
+
+    // Parcourir les totaux journaliers
+    for (const [date, details] of Object.entries(data.daily_totals)) {
+        let dateSection = document.createElement("div");
+        dateSection.className = "mb-3";
+        dateSection.innerHTML = `<h5>${date}</h5>`;
+
+        let formatList = document.createElement("ul");
+        formatList.className = "list-group";
+
+        // Parcourir les formats pour une date spécifique
+        for (const [format_name, quantity] of Object.entries(details.formats)) {
+            const listItem = document.createElement("li");
+            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
+            listItem.innerHTML = `
+                ${format_name}: 
+                <input type="number" class="form-control w-25 mr-2" value="${quantity}" 
+                       onchange="updateProduction('${date}', '${format_name}', this.value)">
+            `;
+            formatList.appendChild(listItem);
+        }
+
+        // Ajouter le total du jour
+        const totalItem = document.createElement("li");
+        totalItem.className = "list-group-item font-weight-bold";
+        totalItem.innerHTML = `Total du jour: ${details.total}`;
+        formatList.appendChild(totalItem);
+
+        dateSection.appendChild(formatList);
+
+        // Bouton Générer rapport
+        const generateButton = document.createElement("button");
+        generateButton.className = "btn btn-outline-primary mt-2 mr-2";
+        generateButton.textContent = "Générer le rapport";
+        generateButton.onclick = () => generateReport(date);
+        dateSection.appendChild(generateButton);
+
+        // Bouton Supprimer
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-outline-danger mt-2";
+        deleteButton.textContent = "Supprimer";
+        deleteButton.onclick = () => deleteProductionByDate(date);
+        dateSection.appendChild(deleteButton);
+
+        dailyProduction.appendChild(dateSection);
+    }
+}
+
 
 
 async function updateProduction(date, format_name, quantity) {
