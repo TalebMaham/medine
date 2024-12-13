@@ -28,7 +28,6 @@ users = {
     "sidi": "sidipassword"
 }
 
-# Routes liées à l'authentification et à la session utilisateur
 @app.route("/")
 def index():
     if 'username' in session:
@@ -52,11 +51,28 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        if username in users:
+            flash('Nom d\'utilisateur déjà pris. Veuillez en choisir un autre.')
+            return redirect(url_for('register'))
+        
+        users[username] = password
+        flash('Inscription réussie. Connectez-vous maintenant.')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     flash('Vous vous êtes déconnecté avec succès.')
     return redirect(url_for('login'))
+
 
 # Routes pour la production
 app.add_url_rule('/add_production', 'add_production', add_production_route, methods=['POST'])

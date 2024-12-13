@@ -1,5 +1,6 @@
  
 body {
+    
     font-family: Arial, sans-serif;
     margin: 20px;
 }
@@ -57,4 +58,39 @@ button:hover {
 
 .toast-success .icon {
     font-size: 20px;
+}
+
+#home {
+    display: block; 
+    width: 50%; /* 50% de la largeur de l'écran */
+    height: 50vh; /* 50% de la hauteur de l'écran */
+    background-image: url("../images/background.jpg");
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    margin: 0 auto; /* Centre horizontalement */
+}
+
+.btn-section {
+    background-color: #007FFF; /* Azur */
+    color: #FFA500; /* Orange */
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+}
+
+.btn-section:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+}
+
+.btn-section:active {
+    background-color: #004494;
+    transform: translateY(0);
 }

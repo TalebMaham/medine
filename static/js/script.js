@@ -19,8 +19,7 @@ function showSection(sectionId) {
         setStock(); 
 
     }
-
-
+    body.style.background = 'none';
 }
 
 function setupProductionForm() {

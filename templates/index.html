@@ -1,37 +1,40 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de Production</title>
+    <title>SIPA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/script_stock.js') }}" defer></script>
-    
 </head>
-<body>
+<body class="container">
     <header>
-        <h1>Gestion de Production</h1>
-        <h3>Bienvenu {{username}}</h3>
+        <h1 style="color: orange;">Société Industrielle des pates Alimentaires</h1>
+        <h3>Bienvenue {{username}}</h3>
         <nav>
-            <button onclick="showSection('production')">Production</button>
-            <button onclick="showSection('stock')">Stock</button>
-            <button onclick="showSection('waste')">Waste</button>
-            <button onclick="showSection('report')">Report</button>
+            <button class="btn-section" onclick="showSection('production')">Production</button>
+            <button class="btn-section" onclick="showSection('stock')">Stock</button>
+            <button class="btn-section" onclick="showSection('waste')">Waste</button>
+            <button class="btn-section" onclick="showSection('report')">Report</button>            
             {% if 'username' in session %}
             <a class="btn btn-primary" href="/medine/logout">Déconnexion</a>
-
             {% endif %}
         </nav>
     </header>
     
     <main>
         <div id="sections">
-            <div id="production" class="section" style="display:none;">
+            <!-- Section d'accueil -->
+            <div id="home" class="section">
+                <!-- Cette section affichera l'image d'accueil -->
+            </div>
+
+            <!-- Sections cachées par défaut -->
+            <div id="production" class="section" style="display:none; background-color: azure;">
                 {% include "partials/production.html" %}
             </div>
-            <div id="stock" class="section" style="display:none;">
+            <div id="stock" class="section" style="display:none; background-color:beige;">
                 {% include "partials/stock.html" %}
             </div>
             <div id="waste" class="section" style="display:none;">

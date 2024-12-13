@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Creer un compte{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title">Login</h1>
-                <form action="{{ url_for('login') }}" method="POST">
+                <h1 class="card-title">Enregistre</h1>
+                <form action="{{ url_for('register') }}" method="POST">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username:</label>
                         <input type="text" class="form-control" id="username" name="username" required>
@@ -17,9 +17,9 @@
                         <label for="password" class="form-label">Password:</label>
                         <input type="password" class="form-control" id="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Connexion</button>
+                    <button type="submit" class="btn btn-primary">Creer un compte</button>
                 </form>
-                <a href="{{ url_for('register') }}" class="btn btn-secondary mt-3">Creer un compte</a>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary mt-3">Connexion</a>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
                         <div class="alert alert-warning mt-3">
