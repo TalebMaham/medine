@@ -407,7 +407,7 @@ function generateReport(date) {
             if (response.status === 204) {
                 alert(`Données supprimées pour la date ${date}.`);
                 isProcessing = false; 
-                await fetchProduction(); // Rafraîchir la liste de production après suppression
+                await  fetchAllProduction(); // Rafraîchir la liste de production après suppression
                 return; // Sortir car il n'y a pas de JSON à traiter
             }
     
@@ -416,7 +416,7 @@ function generateReport(date) {
             if (data.status === "success") {
                 alert(`Données supprimées pour la date ${date}.`);
                 isProcessing = false; 
-                await fetchProduction(); // Rafraîchir la liste de production après suppression
+                await  fetchAllProduction() ; // Rafraîchir la liste de production après suppression
             } else {
                 alert(data.message || "Erreur inconnue."); // Gère les messages d'erreur
             }
