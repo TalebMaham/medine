@@ -23,7 +23,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 API_BASE_URL = "http://localhost:8000/api/productions/"
-#API_BASE_URL  = "https://chri2.com/medineapi/api/productions/"
+API_BASE_URL  = "https://chri2.com/medineapi/api/productions/"
 users = {
     "abidine": "abidinepassword",
     "sidi": "sidipassword"

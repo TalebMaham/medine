@@ -35,6 +35,19 @@
             <div id="home" class="section">
                 <!-- Cette section affichera l'image d'accueil -->
             </div>
+                        <!-- Sections cachées par défaut -->
+                        <div id="production" class="section" style="display:none; background-color: azure;">
+                            {% include "partials/production.html" %}
+                        </div>
+                        <div id="stock" class="section" style="display:none; background-color:beige;">
+                            {% include "partials/stock.html" %}
+                        </div>
+                        <div id="waste" class="section" style="display:none;">
+                            {% include "partials/waste.html" %}
+                        </div>
+                        <div id="report" class="section" style="display:none;">
+                            {% include "partials/report.html" %}
+                        </div>
         </div>
     </main>
 
