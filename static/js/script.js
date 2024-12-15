@@ -30,7 +30,7 @@ function showSection(sectionId) {
         getStock();
         setStock(); 
     }
-    body.style.background = 'none';
+    //body.style.background = 'none';
 }
 
 function setupProductionForm() {
