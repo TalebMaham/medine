@@ -1,9 +1,6 @@
 
 base_url_in_prod = "/medine"
 
-
-
-
 async function fetchDailyTotal(date, film) {
     try {
         const url = `${base_url_in_prod}/daily-total?date=${encodeURIComponent(date)}&format_name=${encodeURIComponent(film)}`;
@@ -23,8 +20,6 @@ async function fetchDailyTotal(date, film) {
         throw error; // Arrêt immédiat en cas d'erreur
     }
 }
-
-
 
 async function setStock() {
     document.getElementById("stock-form").addEventListener("submit", async function (e) {
@@ -88,9 +83,6 @@ async function setStock() {
         }
     });
 }
-
-
-
 
 async function getStock() {
     try {
@@ -160,7 +152,6 @@ async function getStock() {
         alert("Impossible de récupérer le stock.");
     }
 }
-
 
 async function clearStock() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer tout le stock ? Cette action est irréversible.")) {

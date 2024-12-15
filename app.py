@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, session, redirect, url_for, flash, render_template
 from config import Config
+from datetime import datetime
 from production.routes import (
     add_production_route,
     get_production_route,
@@ -22,11 +23,12 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 API_BASE_URL = "http://localhost:8000/api/productions/"
-API_BASE_URL  = "https://chri2.com/medineapi/api/productions/"
+#API_BASE_URL  = "https://chri2.com/medineapi/api/productions/"
 users = {
     "abidine": "abidinepassword",
     "sidi": "sidipassword"
 }
+connected_users = []  # Liste pour suivre les utilisateurs connectés avec leur date de connexion
 
 @app.route("/")
 def index():
@@ -43,6 +45,20 @@ def login():
 
         if username in users and users[username] == password:
             session['username'] = username
+
+            # Vérifie si l'utilisateur est déjà dans la liste
+            user_exists = next((user for user in connected_users if user['username'] == username), None)
+            if user_exists:
+                user_exists['connected'] = True  # Met à jour le statut de connexion
+                user_exists['login_time'] = datetime.now()  # Met à jour la date de connexion
+            else:
+                connected_users.append({
+                    'username': username,
+                    'connected': True,
+                    'login_time': datetime.now(),
+                    'logout_time': None
+                })
+
             flash('Vous vous êtes connecté avec succès.')
             return redirect(url_for('index'))
         else:
@@ -69,9 +85,25 @@ def register():
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
-    flash('Vous vous êtes déconnecté avec succès.')
+    username = session.get('username')
+    if username:
+        # Trouver l'utilisateur et mettre à jour son statut et la date de déconnexion
+        user = next((user for user in connected_users if user['username'] == username), None)
+        if user:
+            user['connected'] = False  # Met à jour le statut de connexion
+            user['logout_time'] = datetime.now()  # Met à jour la date de déconnexion
+
+        session.pop('username', None)
+        flash('Vous vous êtes déconnecté avec succès.')
     return redirect(url_for('login'))
+
+
+
+@app.route('/connected-users', methods=['GET'])
+def get_connected_users():
+    """Retourne la liste des utilisateurs connectés et déconnectés"""
+    return jsonify(connected_users)
+
 
 
 # Routes pour la production

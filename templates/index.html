@@ -11,39 +11,74 @@
 <body class="container">
     <header>
         <h1 style="color: orange;">Société Industrielle des pates Alimentaires</h1>
-        <h3>Bienvenue {{username}}</h3>
+        <h3>Bienvenue {{ username }}</h3>
+
+        <!-- Affichage des utilisateurs connectés et déconnectés -->
+        <h3>Statut des utilisateurs :</h3>
+        <ul id="connected-users-list">
+            <!-- La liste sera remplie automatiquement par JavaScript -->
+        </ul>
+
         <nav>
             <button class="btn-section" onclick="showSection('production')">Production</button>
             <button class="btn-section" onclick="showSection('stock')">Stock</button>
             <button class="btn-section" onclick="showSection('waste')">Waste</button>
             <button class="btn-section" onclick="showSection('report')">Report</button>            
             {% if 'username' in session %}
-            <a class="btn btn-primary" href="/medine/logout">Déconnexion</a>
+            <a class="btn-primary" href="/medine/logout">Déconnexion</a>
             {% endif %}
         </nav>
     </header>
     
     <main>
         <div id="sections">
-            <!-- Section d'accueil -->
             <div id="home" class="section">
                 <!-- Cette section affichera l'image d'accueil -->
             </div>
-
-            <!-- Sections cachées par défaut -->
-            <div id="production" class="section" style="display:none; background-color: azure;">
-                {% include "partials/production.html" %}
-            </div>
-            <div id="stock" class="section" style="display:none; background-color:beige;">
-                {% include "partials/stock.html" %}
-            </div>
-            <div id="waste" class="section" style="display:none;">
-                {% include "partials/waste.html" %}
-            </div>
-            <div id="report" class="section" style="display:none;">
-                {% include "partials/report.html" %}
-            </div>
         </div>
     </main>
+
+    <script>
+        // Fonction pour récupérer la liste des utilisateurs connectés et mettre à jour l'HTML
+        function updateConnectedUsers() {
+            fetch('/connected-users')
+                .then(response => response.json())
+                .then(data => {
+                    const userList = document.getElementById('connected-users-list');
+                    userList.innerHTML = ''; // Vide la liste actuelle
+                    data.forEach(user => {
+                        const listItem = document.createElement('li');
+                        
+                        // Ajout de la petite boule de statut (verte = connecté, rouge = déconnecté)
+                        const statusIcon = document.createElement('span');
+                        statusIcon.style.width = '10px';
+                        statusIcon.style.height = '10px';
+                        statusIcon.style.borderRadius = '50%';
+                        statusIcon.style.display = 'inline-block';
+                        statusIcon.style.marginRight = '10px';
+                        statusIcon.style.backgroundColor = user.connected ? 'green' : 'red';
+
+                        // Ajout de l'info de l'utilisateur
+                        const statusText = document.createElement('span');
+                        const date = user.connected 
+                            ? new Date(user.login_time).toLocaleString() 
+                            : new Date(user.logout_time).toLocaleString();
+                        statusText.textContent = `${user.username} - ${user.connected ? 'Connecté' : 'Déconnecté'} depuis : ${date}`;
+
+                        listItem.appendChild(statusIcon);
+                        listItem.appendChild(statusText);
+                        userList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Erreur lors de la récupération des utilisateurs connectés:', error));
+        }
+
+        // Actualiser la liste toutes les 20 secondes (20000 ms)
+        setInterval(updateConnectedUsers, 20000);
+
+        // Mettre à jour immédiatement au chargement de la page
+        document.addEventListener('DOMContentLoaded', updateConnectedUsers);
+    </script>
+
 </body>
 </html>

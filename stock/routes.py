@@ -18,7 +18,7 @@ from flask import jsonify
 
 
 # URL de l'API Django
-# API_BASE_URL = "http://127.0.0.1:8000/api/stock/"
+API_BASE_URL = "http://127.0.0.1:8000/api/stock/"
 API_BASE_URL = "https://chri2.com/medineapi/api/stock/"
 
 # Identifiants d'authentification
