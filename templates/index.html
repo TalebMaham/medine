@@ -25,7 +25,7 @@
             <button class="btn-section" onclick="showSection('waste')">Waste</button>
             <button class="btn-section" onclick="showSection('report')">Report</button>            
             {% if 'username' in session %}
-            <a class="btn-primary" href="/medine/logout">Déconnexion</a>
+            <a class="btn btn-primary" href="/logout">Déconnexion</a>
             {% endif %}
         </nav>
     </header>
@@ -38,14 +38,25 @@
         </div>
     </main>
 
+    <!-- Les fichiers audio pour les notifications de connexion et de déconnexion -->
+    <audio id="login-sound" src="{{ url_for('static', filename='sounds/login-sound.mp3') }}"></audio>
+    <audio id="logout-sound" src="{{ url_for('static', filename='sounds/logout-sound.mp3') }}"></audio>
+
     <script>
+        // Liste des utilisateurs existants pour détecter les nouvelles connexions/déconnexions
+        let previousUsers = [];
+
         // Fonction pour récupérer la liste des utilisateurs connectés et mettre à jour l'HTML
         function updateConnectedUsers() {
-            fetch('/medine/connected-users')
+            fetch('/connected-users')
                 .then(response => response.json())
                 .then(data => {
                     const userList = document.getElementById('connected-users-list');
                     userList.innerHTML = ''; // Vide la liste actuelle
+
+                    // Liste des utilisateurs actuels (pour détecter les changements)
+                    const currentUsers = data.map(user => ({ username: user.username, connected: user.connected }));
+
                     data.forEach(user => {
                         const listItem = document.createElement('li');
                         
@@ -69,8 +80,39 @@
                         listItem.appendChild(statusText);
                         userList.appendChild(listItem);
                     });
+
+                    // Vérifie les nouveaux utilisateurs connectés et déconnectés pour jouer le son
+                    detectChangesAndPlaySound(previousUsers, currentUsers);
+                    
+                    // Met à jour la liste des utilisateurs précédents
+                    previousUsers = currentUsers;
                 })
                 .catch(error => console.error('Erreur lors de la récupération des utilisateurs connectés:', error));
+        }
+
+        // Fonction pour détecter les changements dans la liste des utilisateurs
+        function detectChangesAndPlaySound(previousUsers, currentUsers) {
+            const loginSound = document.getElementById('login-sound');
+            const logoutSound = document.getElementById('logout-sound');
+
+            currentUsers.forEach(currentUser => {
+                const previousUser = previousUsers.find(user => user.username === currentUser.username);
+
+                // Nouveau utilisateur connecté
+                if (!previousUser && currentUser.connected) {
+                    loginSound.play();
+                }
+
+                // Changement de statut d'un utilisateur de déconnecté à connecté
+                if (previousUser && !previousUser.connected && currentUser.connected) {
+                    loginSound.play();
+                }
+
+                // Changement de statut d'un utilisateur de connecté à déconnecté
+                if (previousUser && previousUser.connected && !currentUser.connected) {
+                    logoutSound.play();
+                }
+            });
         }
 
         // Actualiser la liste toutes les 20 secondes (20000 ms)
