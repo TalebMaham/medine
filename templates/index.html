@@ -25,7 +25,7 @@
             <button class="btn-section" onclick="showSection('waste')">Waste</button>
             <button class="btn-section" onclick="showSection('report')">Report</button>            
             {% if 'username' in session %}
-            <a class="btn btn-primary" href="/logout">Déconnexion</a>
+            <a class="btn btn-primary" href="/medine/logout">Déconnexion</a>
             {% endif %}
         </nav>
     </header>
@@ -48,7 +48,7 @@
 
         // Fonction pour récupérer la liste des utilisateurs connectés et mettre à jour l'HTML
         function updateConnectedUsers() {
-            fetch('/connected-users')
+            fetch('/medine/connected-users')
                 .then(response => response.json())
                 .then(data => {
                     const userList = document.getElementById('connected-users-list');
