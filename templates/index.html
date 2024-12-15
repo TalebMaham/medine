@@ -41,7 +41,7 @@
     <script>
         // Fonction pour récupérer la liste des utilisateurs connectés et mettre à jour l'HTML
         function updateConnectedUsers() {
-            fetch('/connected-users')
+            fetch('/medine/connected-users')
                 .then(response => response.json())
                 .then(data => {
                     const userList = document.getElementById('connected-users-list');
