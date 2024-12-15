@@ -448,5 +448,5 @@ async function showSuccessToast(message) {
         toast.remove();
     }, 3000);
 
-    await fetchProduction(); // Recharger la production
+    await fetchAllProduction() ; // Recharger la production
 }
